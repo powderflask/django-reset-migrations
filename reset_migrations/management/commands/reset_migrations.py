@@ -1,5 +1,6 @@
 from django.core.management import BaseCommand
 from django.core.management import call_command
+from django.apps import apps
 from django.db import connection
 import os
 import shutil
@@ -51,9 +52,10 @@ class Command(BaseCommand):
 
     def delete_files_app(self, app):
         self.stdout.write("Deleting APP (%s) migrations files" % app)
-        migrations_dir = os.path.join(app, 'migrations')
+        app_path = apps.get_app_config(app).path
+        migrations_dir = os.path.join(app_path, 'migrations')
         if os.path.exists(migrations_dir):
-            shutil.rmtree(os.path.join(app, 'migrations'))
+            shutil.rmtree(migrations_dir)
 
     def delete_dependence_app(self, app):
         self.stdout.write("Deleting dependences in migrations for (%s)" % app)
