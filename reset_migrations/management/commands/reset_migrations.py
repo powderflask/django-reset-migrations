@@ -39,6 +39,12 @@ class Command(BaseCommand):
                             default=False,
                             help='Dont delete the migrations files')
 
+        parser.add_argument('--no_migrations',
+                            action='store_true',
+                            dest='no_migrations',
+                            default=False,
+                            help='Dont make and run initial migrations - must be done manually after reset!')
+
     def delete_database_app(self, app):
         self.stdout.write("Deleting APP (%s) in database" % app)
         self.cursor.execute("DELETE from django_migrations WHERE app = %s", [app])
@@ -74,8 +80,9 @@ class Command(BaseCommand):
                 self.delete_dependence_app(app)
             self.stdout.write("APP (%s) deleted with success" % app)
 
-        if not options['cached']:
+        if not options['cached'] and not options['no_migrations']:
             call_command('makemigrations', *apps)
 
-        for app in apps:
-            call_command('migrate', app, '--fake')
+        if not options['no_migrations']:
+            for app in apps:
+                call_command('migrate', app, '--fake')
